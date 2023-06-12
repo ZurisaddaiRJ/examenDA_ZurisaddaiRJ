@@ -30,64 +30,57 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/materia")
 public class ControllersMaterias {
-
+    
     @Autowired
     private RepositoryMateria repositorymateria;
-
+    
     @GetMapping("/msg")
     public String holamundo() {
         return "Hola mundo";
     }
-
+    
     @GetMapping("/{id}")
     public ResponseEntity<Materia> obtenermateria(@PathVariable("id") long id) {
         Optional<Materia> optionalMateria = repositorymateria.findById(id);
         if (!optionalMateria.isPresent()) {
             return ResponseEntity.unprocessableEntity().build();
         }
-
+        
         return ResponseEntity.ok(optionalMateria.get());
     }
-
+    
     @GetMapping
     public ResponseEntity<List<Materia>> obtenerTodosLasmaterias() {
         return ResponseEntity.ok(repositorymateria.findAll());
     }
-
+    
     @PostMapping
     public Materia crearMateria(@RequestBody DTOMateria materiaDTO) {
         Materia materia = new Materia();
         BeanUtils.copyProperties(materiaDTO, materia);
         return repositorymateria.save(materia);
     }
-
+    
     @PutMapping("/{id}")
     public ResponseEntity<Materia> actualizarMateria(@PathVariable("id") Long id, @RequestBody DTOMateria materiaDTO) {
         Materia materia = new Materia();
         materia.setNombre(materiaDTO.getNombre());
         materia.setCredito(materiaDTO.getCredito());
         Optional<Materia> optionalMateria = repositorymateria.findById(id);
-
+        
         if (!optionalMateria.isPresent()) {
             return ResponseEntity.unprocessableEntity().build();
         }
-
+        
         materia.setClavemateria(optionalMateria.get().getClavemateria());
         repositorymateria.save(materia);
-
+        
         return ResponseEntity.noContent().build();
     }
-
+    
     @DeleteMapping("/{id}")
-    public ResponseEntity<Materia> eliminarEmpleado(@PathVariable("id") Long id) {
-        Optional<Materia> optionalMateria = repositorymateria.findById(id);
-
-        if (!optionalMateria.isPresent()) {
-            return ResponseEntity.unprocessableEntity().build();
-        }
-
-        repositorymateria.delete(optionalMateria.get());
-        return ResponseEntity.noContent().build();
+    public void eliminarMateria(@PathVariable("id") Long id) {
+        repositorymateria.findById(id);
     }
-
+    
 }

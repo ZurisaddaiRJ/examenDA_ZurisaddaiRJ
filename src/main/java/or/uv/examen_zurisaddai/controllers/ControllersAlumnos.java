@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 /**
  *
  * @author zurisaddairj
@@ -78,15 +79,9 @@ public class ControllersAlumnos {
 
         return ResponseEntity.noContent().build();
     }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Alumnos> eliminarEmpleado(@PathVariable("id") Long id) {
-        Optional<Alumnos> optionalAlumnos = repositoryalumno.findById(id);
-
-        if (!optionalAlumnos.isPresent()) {
-            return ResponseEntity.unprocessableEntity().build();
-        }
-
-        repositoryalumno.delete(optionalAlumnos.get());
-        return ResponseEntity.noContent().build();
+    public void eliminarAlumno(@PathVariable("id") Long id) {
+        repositoryalumno.findById(id);
     }
 }
