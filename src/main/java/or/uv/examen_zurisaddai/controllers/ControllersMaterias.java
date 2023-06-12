@@ -11,6 +11,7 @@ import or.uv.examen_zurisaddai.models.Materia;
 import or.uv.examen_zurisaddai.repository.RepositoryMateria;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 
 /**
  *
@@ -40,51 +40,54 @@ public class ControllersMaterias {
     }
 
     @GetMapping("/{id}")
-    public Materia obtenermateria(@PathVariable("id") long id) {
+    public ResponseEntity<Materia> obtenermateria(@PathVariable("id") long id) {
         Optional<Materia> optionalMateria = repositorymateria.findById(id);
-        if (optionalMateria.isPresent()) {
-            Materia materia = optionalMateria.get();
-            return materia;
-        } else {
-            return null;
+        if (!optionalMateria.isPresent()) {
+            return ResponseEntity.unprocessableEntity().build();
         }
+
+        return ResponseEntity.ok(optionalMateria.get());
     }
 
     @GetMapping
-    public List<Materia> obtenerTodosLasmaterias() {
-        List<Materia> materia = (List<Materia>) repositorymateria.findAll();
-        return materia;
+    public ResponseEntity<List<Materia>> obtenerTodosLasmaterias() {
+        return ResponseEntity.ok(repositorymateria.findAll());
     }
 
     @PostMapping
     public Materia crearMateria(@RequestBody DTOMateria materiaDTO) {
         Materia materia = new Materia();
         BeanUtils.copyProperties(materiaDTO, materia);
-
-        Materia materiaNuevo = repositorymateria.save(materia);
-
-        return materiaNuevo;
+        return repositorymateria.save(materia);
     }
 
     @PutMapping("/{id}")
-    public Materia actualizarMateria(@PathVariable("id") Long id, @RequestBody DTOMateria materiaDTO) {
+    public ResponseEntity<Materia> actualizarMateria(@PathVariable("id") Long id, @RequestBody DTOMateria materiaDTO) {
+        Materia materia = new Materia();
+        materia.setNombre(materiaDTO.getNombre());
+        materia.setCredito(materiaDTO.getCredito());
         Optional<Materia> optionalMateria = repositorymateria.findById(id);
-        if (optionalMateria.isPresent()) {
-            Materia materia = optionalMateria.get();
-            materia.setNombre(materiaDTO.getNombre());
-            materia.setCredito(materiaDTO.getCredito());
 
-            Materia materiaActualizado = repositorymateria.save(materia);
-
-            return materiaActualizado;
-        } else {
-            return null;
+        if (!optionalMateria.isPresent()) {
+            return ResponseEntity.unprocessableEntity().build();
         }
+
+        materia.setClavemateria(optionalMateria.get().getClavemateria());
+        repositorymateria.save(materia);
+
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public void eliminarEmpleado(@PathVariable("id") Long id) {
-        repositorymateria.deleteById(id);
+    public ResponseEntity<Materia> eliminarEmpleado(@PathVariable("id") Long id) {
+        Optional<Materia> optionalMateria = repositorymateria.findById(id);
+
+        if (!optionalMateria.isPresent()) {
+            return ResponseEntity.unprocessableEntity().build();
+        }
+
+        repositorymateria.delete(optionalMateria.get());
+        return ResponseEntity.noContent().build();
     }
 
 }

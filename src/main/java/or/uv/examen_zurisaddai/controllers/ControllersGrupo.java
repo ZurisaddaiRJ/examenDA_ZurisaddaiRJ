@@ -15,6 +15,7 @@ import or.uv.examen_zurisaddai.repository.RepositoryGrupo;
 import or.uv.examen_zurisaddai.repository.RepositoryMateria;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,21 +50,18 @@ public class ControllersGrupo {
     }
 
     @GetMapping("/{id}")
-    public Grupo obtenergrupo(@PathVariable("id") long id) {
+    public ResponseEntity<Grupo> obtenergrupo(@PathVariable("id") long id) {
         Optional<Grupo> optionalGrupo = repositorygrupo.findById(id);
-        if (optionalGrupo.isPresent()) {
-            Grupo grupo = optionalGrupo.get();
-            return grupo;
-        } else {
-            return null;
+        if (!optionalGrupo.isPresent()) {
+            return ResponseEntity.unprocessableEntity().build();
         }
+
+        return ResponseEntity.ok(optionalGrupo.get());
     }
 
     @GetMapping
-    public List<Grupo> obtenerTodosLasmaterias() {
-        List<Grupo> grupo = (List<Grupo>) repositorygrupo.findAll();
-
-        return grupo;
+    public ResponseEntity<List<Grupo>> obtenerTodosLasmaterias() {
+        return ResponseEntity.ok(repositorygrupo.findAll());
     }
 
     @PostMapping
@@ -85,22 +83,30 @@ public class ControllersGrupo {
     }
 
     @PutMapping("/{id}")
-    public Grupo actualizarGrupo(@PathVariable("id") Long id, @RequestBody DTOGrupo grupoDTO) {
+    public ResponseEntity<Grupo> actualizarGrupo(@PathVariable("id") Long id, @RequestBody DTOGrupo grupoDTO) {
+        Grupo grupo = new Grupo();
+        grupo.setNombregrupo(grupoDTO.getNombregrupo());
         Optional<Grupo> optionalGrupo = repositorygrupo.findById(id);
-        if (optionalGrupo.isPresent()) {
-            Grupo grupo = optionalGrupo.get();
-            grupo.setNombregrupo(grupoDTO.getNombregrupo());
 
-            Grupo grupoActualizado = repositorygrupo.save(grupo);
-
-            return grupoActualizado;
-        } else {
-            return null;
+        if (!optionalGrupo.isPresent()) {
+            return ResponseEntity.unprocessableEntity().build();
         }
+
+        grupo.setId(optionalGrupo.get().getId());
+        repositorygrupo.save(grupo);
+
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public void eliminarGrupo(@PathVariable("id") Long id) {
-        repositorygrupo.deleteById(id);
+    public ResponseEntity<Grupo> eliminarGrupo(@PathVariable("id") Long id) {
+        Optional<Grupo> optionalGrupo = repositorygrupo.findById(id);
+
+        if (!optionalGrupo.isPresent()) {
+            return ResponseEntity.unprocessableEntity().build();
+        }
+
+        repositorygrupo.delete(optionalGrupo.get());
+        return ResponseEntity.noContent().build();
     }
 }
